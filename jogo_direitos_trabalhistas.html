@@ -1,0 +1,1613 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Missão: Trabalho com Direitos</title>
+    <script
+      typ="text/javascript"
+      src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=zT91K4DxuWpflAgCUzUM7aElo0gRN59dfeHIkkb4RV3oz7DWe-hjRJ7hX6kBg0X-EEmeiUlWuMHUW6xbB8oYJmt95S8MyST-tDCXaq2Gp5kirtcvyLPLBBLrS7MJTfNNktWKQYUYsKHBR4H3FeG-3nfklQqTKJ3hmZyXLL6JsvMAf0RQYslDBhjWF1eI_STStZkXKzHErIqDwX8FhsvjGBE59qVIyDi4757jfDMe7-lluPdDiciWZvZWtdYsaaGPytJ_YL0NmM8cEn2dEmVYJg"
+      charset="UTF-8"
+    ></script>
+    <link
+      rel="stylesheet"
+      crossorigin="anonymous"
+      href="https://gc.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9jaGF0Z3B0LmNvbS9iYWNrZW5kLWFwaS9lc3R1YXJ5L2NvbnRlbnQ_aWQ9ZmlsZV8wMDAwMDAwMDU2Zjg4MjBlOTAzNWM3NWM4MDcyMDY2ZiZ0cz00OTc0NjYmcD1mcyZjaWQ9MSZzaWc9OWE3NWRiMThiYjczYmYxZGEzZmRjNDQxOWM5NzE1NGFiOWFlMDIwNzg2N2VjNDFjMDZhODM1MGJhMWJmOWEwOSZ2PTA"
+    />
+    <style>
+      :root {
+        --azul: #1e4fa3; /* cor principal */
+        --azul-claro: #e8f0fc; /* fundo dos botões de opção */
+        --amarelo: #f5c518; /* destaque e botões grandes */
+        --cinza: #5b6472; /* textos secundários */
+        --fundo: #f3f5f9; /* fundo da página */
+        --verde: #2e9e5b; /* resposta certa */
+        --vermelho: #d64545; /* resposta errada */
+        --noite: #14213d; /* fundo escuro do minigame e da tela final */
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--fundo);
+        color: #222;
+        line-height: 1.5;
+      }
+      #app {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 12px;
+      }
+
+      /* Topo com progresso e pontos */
+      #topo {
+        display: none;
+        background: var(--azul);
+        color: #fff;
+        padding: 10px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+      }
+      .linha {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+      }
+      .fita {
+        background: #ffffff55;
+        border-radius: 8px;
+        height: 10px;
+        overflow: hidden;
+        margin-top: 6px;
+      }
+      #barra {
+        height: 100%;
+        width: 0;
+        background: var(--amarelo);
+        transition: width 0.4s;
+      }
+
+      /* Telas: só a tela "ativa" aparece */
+      .tela {
+        display: none;
+        background: #fff;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 2px 10px #0002;
+        margin-top: 14px;
+      }
+      .tela.ativa {
+        display: block;
+        animation: entra 0.35s;
+      }
+      @keyframes entra {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      h1,
+      h2 {
+        color: var(--azul);
+        margin-top: 0;
+      }
+
+      /* Botões grandes (bons para celular) */
+      button {
+        font-size: 17px;
+        border: 0;
+        border-radius: 12px;
+        padding: 14px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+        text-align: left;
+      }
+      .grande {
+        background: var(--amarelo);
+        color: #222;
+        font-weight: bold;
+        text-align: center;
+      }
+      .claro {
+        background: #e3e6ec;
+        color: #222;
+        text-align: center;
+      }
+      .op {
+        background: var(--azul-claro);
+        color: #12306b;
+        border: 2px solid #b9cdf0;
+      }
+      .op:disabled {
+        cursor: default;
+      }
+      .certo {
+        background: #d9f3e3;
+        border-color: var(--verde);
+      }
+      .errado {
+        background: #fbe0e0;
+        border-color: var(--vermelho);
+      }
+      .fb {
+        background: #fff8da;
+        border-left: 6px solid var(--amarelo);
+        padding: 4px 12px 12px;
+        border-radius: 8px;
+        margin-top: 14px;
+      }
+      .aviso {
+        font-size: 14px;
+        color: var(--cinza);
+        background: #eef0f4;
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      /* =====================================================
+   VISUAL ESCURO (minigame e tela final)
+   Fundo escuro, ficha de papel e selos coloridos
+   ===================================================== */
+      .tela.escura {
+        background: var(--noite);
+        color: #fff;
+      }
+      .tela.escura h2,
+      .tela.escura h3 {
+        color: var(--amarelo);
+      }
+      .ficha {
+        position: relative;
+        background: #fffdf4;
+        color: #222;
+        border: 2px dashed #b9a85a;
+        border-radius: 6px;
+        padding: 16px;
+        margin: 14px 0 18px;
+        transform: rotate(-1deg);
+        box-shadow: 0 4px 12px #0007;
+      }
+      .ficha-topo {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        letter-spacing: 1px;
+        color: var(--cinza);
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 6px;
+        margin-bottom: 10px;
+      }
+      .ficha-texto {
+        font-size: 19px;
+        margin: 0;
+        min-height: 90px;
+      }
+      .carimbo {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        border: 4px solid;
+        padding: 4px 12px;
+        font-size: 22px;
+        font-weight: bold;
+        border-radius: 8px;
+        background: #fffdf4dd;
+        display: none;
+        transform: rotate(-12deg);
+      }
+      .carimbo.mostra {
+        display: block;
+        animation: pop 0.3s;
+      }
+      .carimbo.ok {
+        color: var(--verde);
+        border-color: var(--verde);
+      }
+      .carimbo.no {
+        color: var(--vermelho);
+        border-color: var(--vermelho);
+      }
+      @keyframes pop {
+        from {
+          transform: rotate(-12deg) scale(2);
+          opacity: 0;
+        }
+        to {
+          transform: rotate(-12deg) scale(1);
+          opacity: 1;
+        }
+      }
+      /* Os 3 selos lado a lado */
+      .selos {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .selo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 14px 4px;
+        margin: 0;
+        border: 3px solid;
+        color: #fff;
+      }
+      .selo span {
+        font-size: 30px;
+      }
+      .s0 {
+        background: #2e9e5b;
+        border-color: #1f6e3f;
+      }
+      .s1 {
+        background: #d64545;
+        border-color: #9a2d2d;
+      }
+      .s2 {
+        background: #c99a00;
+        border-color: #8a6a00;
+      }
+      .selo:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      .selo.destaque {
+        opacity: 1;
+        outline: 4px solid #fff;
+      }
+      .parecer {
+        background: #fff;
+        color: #222;
+        border-radius: 8px;
+        padding: 4px 14px 12px;
+        margin-top: 14px;
+        border-left: 6px solid var(--amarelo);
+      }
+      .parecer h3 {
+        margin-bottom: 6px;
+        color: var(--azul);
+      }
+
+      /* =====================================================
+   TELA FINAL: "Relatório do Fiscal"
+   ===================================================== */
+      .relatorio {
+        transform: rotate(0);
+        margin-top: 6px;
+        text-align: center;
+        padding-bottom: 22px;
+      }
+      .relatorio .patente {
+        font-size: 56px;
+        line-height: 1.1;
+        margin: 8px 0 0;
+      }
+      .relatorio .titulo-patente {
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--azul);
+        margin: 0;
+      }
+      .relatorio .sub {
+        color: var(--cinza);
+        font-size: 14px;
+        margin: 4px 0 10px;
+      }
+      .nota {
+        font-size: 44px;
+        font-weight: bold;
+        color: var(--azul);
+        margin: 6px 0 0;
+      }
+      .nota small {
+        font-size: 18px;
+        color: var(--cinza);
+      }
+      .carimbo-final {
+        display: inline-block;
+        border: 4px solid var(--verde);
+        color: var(--verde);
+        font-weight: bold;
+        font-size: 18px;
+        padding: 4px 14px;
+        border-radius: 8px;
+        transform: rotate(-6deg);
+        margin-top: 10px;
+        letter-spacing: 1px;
+      }
+      .placar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin: 14px 0;
+      }
+      .caixa {
+        background: #1f3158;
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+        border: 2px solid #ffffff22;
+      }
+      .caixa b {
+        display: block;
+        font-size: 26px;
+        color: var(--amarelo);
+      }
+      .caixa span {
+        font-size: 13px;
+      }
+      .mini-barra {
+        height: 10px;
+        background: #ffffff33;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+      .mini-barra div {
+        height: 100%;
+        background: var(--amarelo);
+        border-radius: 8px;
+      }
+      .msg-final {
+        background: #1f3158;
+        border-left: 6px solid var(--amarelo);
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin: 14px 0;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .chip {
+        background: #fffdf4;
+        color: #222;
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 14px;
+      }
+      .cracha {
+        background: #fffdf4;
+        color: #222;
+        border: 2px dashed #b9a85a;
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+        font-size: 14px;
+        margin-top: 18px;
+      }
+      .cracha b {
+        color: var(--azul);
+        font-size: 16px;
+      }
+
+      .relacao-painel {
+        display: grid;
+        grid-template-columns: 1fr 70px 1fr;
+        gap: 16px;
+        align-items: start;
+        margin-top: 20px;
+      }
+      .relacao-coluna {
+        background: rgba(255, 255, 255, 0.96);
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+        border: 2px solid rgba(255, 255, 255, 0.75);
+      }
+      .relacao-coluna h3 {
+        margin: 0 0 14px;
+        text-align: center;
+        font-size: 17px;
+        color: #17366f;
+      }
+      .relacao-conector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100%;
+        font-size: 30px;
+        color: #f0b400;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      .item-relacao {
+        position: relative;
+        display: block;
+        width: 100%;
+        min-height: 82px;
+        background: #f7f9ff;
+        color: #1c315f;
+        border: 2px solid #d6e0f3;
+        border-radius: 13px;
+        padding: 13px 14px;
+        margin: 0 0 10px;
+        font-size: 14px;
+        line-height: 1.35;
+        text-align: left;
+        cursor: pointer;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s,
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .item-relacao:hover:not(:disabled) {
+        transform: translateY(-2px);
+        border-color: #7fa5e8;
+        box-shadow: 0 5px 12px rgba(35, 75, 145, 0.15);
+      }
+      .item-relacao.selecionado {
+        transform: translateY(-2px);
+        border-color: #f0b400;
+        background: #fff7d6;
+        box-shadow:
+          0 0 0 4px rgba(240, 180, 0, 0.2),
+          0 6px 14px rgba(0, 0, 0, 0.12);
+      }
+      .item-relacao.relacionado {
+        background: #e3f7ea;
+        border-color: #39a965;
+        color: #185c35;
+        cursor: default;
+        opacity: 0.8;
+      }
+      .item-relacao.erro {
+        background: #ffe5e5;
+        border-color: #df5555;
+        animation: relacaoShake 0.25s linear;
+      }
+      .item-relacao:disabled {
+        cursor: default;
+      }
+      .relacao-status {
+        margin: 16px auto 0;
+        max-width: 720px;
+        padding: 11px 15px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.92);
+        color: #17366f;
+        text-align: center;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
+      .relacao-legenda {
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.92);
+      }
+      .relacao-legenda span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .relacao-legenda i {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        background: #f0b400;
+      }
+      .relacao-legenda .verde {
+        background: #39a965;
+      }
+      .relacao-legenda .vermelho {
+        background: #df5555;
+      }
+      @keyframes relacaoShake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+      @media (max-width: 720px) {
+        .relacao-painel {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .relacao-conector {
+          display: none;
+        }
+        .relacao-coluna {
+          padding: 12px;
+        }
+        .item-relacao {
+          min-height: 70px;
+        }
+      }
+
+      /* =====================================================
+   BACKGROUNDS SIMPLES — apenas cor + pattern discreto
+   ===================================================== */
+
+      body {
+        min-height: 100vh;
+        background: #eef2f7;
+        transition: background 0.3s ease;
+      }
+
+      /* INÍCIO — azul claro + grade discreta */
+      body:has(#tInicio.ativa) {
+        background-color: #dfeafa;
+        background-image:
+          linear-gradient(rgba(53, 91, 145, 0.055) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(53, 91, 145, 0.055) 1px, transparent 1px);
+        background-size: 28px 28px;
+      }
+      #tInicio {
+        background: rgba(255, 255, 255, 0.96);
+      }
+
+      /* CASOS — bege + linhas diagonais */
+      body:has(#tCaso.ativa) {
+        background-color: #f1e6d2;
+        background-image: repeating-linear-gradient(
+          135deg,
+          rgba(116, 82, 43, 0.045) 0px,
+          rgba(116, 82, 43, 0.045) 2px,
+          transparent 2px,
+          transparent 18px
+        );
+      }
+      #tCaso {
+        background: rgba(255, 252, 245, 0.97);
+      }
+
+      /* MINIGAME 1 — azul escuro + pattern de pequenos quadrados */
+      body:has(#tIntroMini.ativa),
+      body:has(#tCartao.ativa) {
+        background-color: #1c2b45;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.035) 1px,
+            transparent 1px
+          );
+        background-size: 24px 24px;
+      }
+      #tIntroMini,
+      #tCartao {
+        background: rgba(245, 248, 252, 0.97);
+      }
+
+      /* MINIGAME 2 — verde petróleo + linhas suaves */
+      body:has(#tIntroRelacao.ativa),
+      body:has(#tRelacao.ativa) {
+        background-color: #dcece8;
+        background-image: repeating-linear-gradient(
+          45deg,
+          rgba(35, 105, 94, 0.045) 0px,
+          rgba(35, 105, 94, 0.045) 2px,
+          transparent 2px,
+          transparent 20px
+        );
+      }
+      #tIntroRelacao,
+      #tRelacao {
+        background: rgba(248, 252, 251, 0.97);
+      }
+
+      /* RESULTADO — roxo escuro + pequenos pontos */
+      body:has(#tFinal.ativa) {
+        background-color: #302b4d;
+        background-image: radial-gradient(
+          rgba(255, 255, 255, 0.07) 1px,
+          transparent 1px
+        );
+        background-size: 18px 18px;
+      }
+      #tFinal {
+        background: rgba(250, 249, 246, 0.98);
+      }
+    </style>
+    <style>
+      /* =====================================================
+   CORREÇÃO DE CONTRASTE — mantém backgrounds e funções
+   ===================================================== */
+      #tInicio,
+      #tCaso,
+      #tIntroMini,
+      #tCartao,
+      #tIntroRelacao,
+      #tRelacao,
+      #tFinal {
+        color: #172033;
+      }
+      #tInicio h1,
+      #tInicio h2,
+      #tInicio h3,
+      #tCaso h1,
+      #tCaso h2,
+      #tCaso h3,
+      #tIntroMini h1,
+      #tIntroMini h2,
+      #tIntroMini h3,
+      #tCartao h1,
+      #tCartao h2,
+      #tCartao h3,
+      #tIntroRelacao h1,
+      #tIntroRelacao h2,
+      #tIntroRelacao h3,
+      #tRelacao h1,
+      #tRelacao h2,
+      #tRelacao h3,
+      #tFinal h1,
+      #tFinal h2,
+      #tFinal h3 {
+        color: #172033;
+      }
+      #tInicio p,
+      #tInicio li,
+      #tCaso p,
+      #tCaso li,
+      #tIntroMini p,
+      #tIntroMini li,
+      #tCartao p,
+      #tCartao li,
+      #tIntroRelacao p,
+      #tIntroRelacao li,
+      #tRelacao p,
+      #tRelacao li,
+      #tFinal p,
+      #tFinal li {
+        color: #263247;
+      }
+      #tCaso .caso,
+      #tCartao .cartao,
+      #tRelacao .coluna,
+      #tRelacao .problema,
+      #tRelacao .direito {
+        color: #172033;
+      }
+      #tCaso button,
+      #tCartao button,
+      #tRelacao button,
+      #tFinal button {
+        color: #172033;
+      }
+      #tCaso .opcao,
+      #tRelacao .item,
+      #tRelacao .card {
+        color: #172033;
+      }
+    </style>
+    <style>
+      /* Correção específica da legenda do minigame 2 */
+      #tRelacao .legenda,
+      #tRelacao .legenda *,
+      #tIntroRelacao .legenda,
+      #tIntroRelacao .legenda * {
+        color: #172033 !important;
+        text-shadow: none !important;
+        opacity: 1 !important;
+      }
+      #tRelacao .legenda span,
+      #tRelacao .legenda div,
+      #tIntroRelacao .legenda span,
+      #tIntroRelacao .legenda div {
+        color: #172033 !important;
+      }
+    </style>
+    <style>
+      /* CORREÇÃO DEFINITIVA — legenda do Minigame 2 */
+      .relacao-legenda,
+      .relacao-legenda span {
+        color: #172033 !important;
+        text-shadow: none !important;
+        opacity: 1 !important;
+      }
+      .relacao-legenda i {
+        flex: 0 0 auto;
+      }
+      .relacao-legenda i:not(.verde):not(.vermelho) {
+        background: #f0b400 !important;
+      }
+      .relacao-legenda .verde {
+        background: #39a965 !important;
+      }
+      .relacao-legenda .vermelho {
+        background: #df5555 !important;
+      }
+    </style>
+    <style>
+      /* =====================================================
+   AJUSTE DA LEITURA — caixas do resultado final
+   ===================================================== */
+      #tFinal .placar .caixa {
+        background: #f7f9ff !important;
+        color: #172033 !important;
+        border: 2px solid #d6e0f3 !important;
+        box-shadow: 0 3px 8px rgba(23, 32, 51, 0.1);
+      }
+      #tFinal .placar .caixa span {
+        color: #263247 !important;
+      }
+      #tFinal .placar .caixa b {
+        color: #d49b00 !important;
+      }
+      #tFinal .placar .mini-barra {
+        background: #d8e0ee !important;
+      }
+      #tFinal .msg-final {
+        background: #f7f9ff !important;
+        color: #172033 !important;
+        border-left: 6px solid #f0b400 !important;
+        border-top: 1px solid #d6e0f3;
+        border-right: 1px solid #d6e0f3;
+        border-bottom: 1px solid #d6e0f3;
+      }
+      #tFinal .msg-final * {
+        color: #172033 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <!-- Topo: progresso e pontuação -->
+      <div id="topo">
+        <div class="linha">
+          <span id="rotulo"></span><span id="pontos"></span>
+        </div>
+        <div class="fita"><div id="barra"></div></div>
+      </div>
+
+      <!-- PARTE 1: TELA INICIAL -->
+      <div class="tela ativa" id="tInicio">
+        <h1>⚖️ Missão: Trabalho com Direitos</h1>
+        <p>
+          Você é um <b>Fiscal Cidadão do Trabalho</b>. Vai analisar situações
+          fictícias de trabalho e ajudar os personagens a entender se seus
+          direitos estão sendo respeitados.
+        </p>
+        <p class="aviso">
+          Este jogo tem objetivo educativo e não substitui orientação
+          profissional, sindical ou jurídica.
+        </p>
+        <button class="grande" onclick="comecar()">▶️ Começar missão</button>
+        <button class="claro" onclick="alternarComo()">❓ Como jogar</button>
+        <div id="como" style="display: none" class="fb">
+          <p>
+            1) Leia cada caso e escolha a melhor atitude. Atenção: as três
+            opções podem parecer boas!<br />
+            2) Leia o feedback: ele explica o direito envolvido e por que as
+            outras opções falham.<br />
+            3) No minigame, carimbe cada ficha com um selo: respeitado, violado
+            ou precisa analisar melhor.<br />
+            4) Casos certos valem 10 pontos; fichas certas valem 5.
+          </p>
+        </div>
+      </div>
+
+      <!-- PARTE 2: CASOS (preenchido pelo JavaScript) -->
+      <div class="tela" id="tCaso"><div id="caso"></div></div>
+
+      <!-- Introdução do minigame (visual escuro) -->
+      <div class="tela escura" id="tIntroMini">
+        <h2>🔎 Minigame: Fiscal do Trabalho</h2>
+        <p>
+          Você agora está na mesa de fiscalização! Cada ficha traz uma situação.
+          Use os selos para decidir se o direito foi <b>respeitado</b>,
+          <b>violado</b> ou se <b>precisa analisar melhor</b> (quando faltam
+          informações).
+        </p>
+        <p>
+          Cuidado: algumas fichas parecem simples, mas o detalhe muda tudo. 🕵️
+        </p>
+        <button class="grande" onclick="iniciarMini()">
+          Abrir a primeira ficha
+        </button>
+      </div>
+      <div class="tela escura" id="tIntroRelacao">
+        <h2>🔗 Minigame 2: Relacione os direitos</h2>
+        <p>
+          Relacione cada <b>problema no trabalho</b> ao
+          <b>direito que foi violado</b>.
+        </p>
+        <p class="aviso">
+          Clique primeiro em um problema e depois no direito correspondente.
+        </p>
+        <button class="grande" onclick="iniciarRelacao()">
+          Começar desafio 🔗
+        </button>
+      </div>
+      <div class="tela escura" id="tRelacao"><div id="relacao"></div></div>
+
+      <!-- PARTE 3: MINIGAME (preenchido pelo JavaScript) -->
+      <div class="tela escura" id="tCartao"><div id="cartao"></div></div>
+
+      <!-- TELA FINAL (preenchida pelo JavaScript, também em visual escuro) -->
+      <div class="tela escura" id="tFinal"><div id="final"></div></div>
+    </div>
+
+    <script>
+      /* =====================================================
+   ✏️ EDITE AQUI: SEU NOME E A ESCOLA (créditos finais)
+   ===================================================== */
+      const NOME_ALUNO = "[Miguel Masiero Rech]";
+      const ESCOLA = "Colégio Estadual Presidente Castelo Branco";
+
+      /* Pontos por acerto (pode mudar) */
+      const PONTOS_CASO = 10;
+      const PONTOS_MINI = 5;
+
+      /* =====================================================
+   ✏️ EDITE AQUI: OS 6 CASOS PRINCIPAIS
+   - nome: personagem | historia: o que acontece
+   - opcoes: 3 alternativas | certa: número da melhor (0, 1 ou 2)
+     (o jogo embaralha a ordem sozinho, então pode deixar a certa em qualquer posição)
+   - DICA: mantenha as 3 alternativas com tamanho parecido!
+   - direito / importa / erros / atitude: texto do feedback
+   ===================================================== */
+      const CASOS = [
+        {
+          icone: "📚",
+          titulo: "Trabalho e escola",
+          nome: "Júlia, 16 anos",
+          historia:
+            "é jovem aprendiz numa loja e seu contrato prevê 4 horas de trabalho por dia, em horário que combina com a escola. Na semana de promoção, o gerente pede que ela fique 2 horas além do combinado e garante que serão pagas como horas extras. Ela já perdeu duas aulas.",
+          opcoes: [
+            "Explicar que o contrato de aprendizagem limita a jornada e procurar os responsáveis e a instituição formadora.",
+            "Aceitar só nessa semana, já que as horas extras serão pagas e a promoção vai passar logo depois.",
+            "Aceitar e compensar depois, saindo mais cedo em outros dias para não perder nenhuma outra aula.",
+          ],
+          certa: 0,
+          direito:
+            "Jovem aprendiz: a jornada é limitada (em regra, até 6 horas por dia), a lei não permite prorrogação nem compensação de jornada, e o horário precisa permitir frequentar a escola.",
+          importa:
+            "A aprendizagem é uma formação profissional. O objetivo é conciliar trabalho e estudo, sem prejudicar a escola.",
+          erros:
+            "Pagar como hora extra ou compensar depois parecem soluções, mas para o aprendiz a prorrogação e a compensação de jornada não são permitidas.",
+          atitude:
+            "Conversar com os responsáveis, a escola e a instituição formadora. Se for preciso, procurar o sindicato ou o Ministério Público do Trabalho (MPT).",
+        },
+
+        {
+          icone: "⏰",
+          titulo: "Horas extras e banco de horas",
+          nome: "Carlos, 25 anos",
+          historia:
+            'trabalha numa fábrica que tem banco de horas previsto em acordo coletivo. Há 4 meses ele fica 2 horas a mais por dia. O supervisor diz que "vai compensar", mas Carlos nunca teve uma folga e não consegue ver o saldo de horas.',
+          opcoes: [
+            "Continuar aceitando, porque no banco de horas a empresa nunca precisa pagar as horas extras acumuladas.",
+            "Pedir o extrato do banco de horas por escrito e procurar o sindicato se não houver folga nem pagamento.",
+            "Registrar o ponto só no horário normal para o saldo não crescer e evitar conflito com o supervisor.",
+          ],
+          certa: 1,
+          direito:
+            "Banco de horas: o excesso de jornada pode ser trocado por folgas, mas dentro das regras e do prazo do acordo, com controle transparente. Horas não compensadas devem ser pagas com adicional.",
+          importa:
+            "Sem controle e sem compensação, o trabalhador perde dinheiro e tempo de descanso, mesmo com um acordo válido.",
+          erros:
+            "O banco de horas não elimina o direito: só troca pagamento por folga quando há regra válida e controle. Registrar o ponto errado esconde o problema e tira provas do trabalhador.",
+          atitude:
+            "Pedir o extrato por escrito, guardar anotações e buscar orientação no sindicato, no RH ou no Ministério do Trabalho.",
+        },
+
+        {
+          icone: "🏖️",
+          titulo: "Férias",
+          nome: "Marta, 34 anos",
+          historia:
+            'trabalha há mais de um ano num restaurante, com carteira assinada. O patrão diz que ela só pode tirar 10 dias de descanso e que os outros 20 dias "serão pagos em dinheiro", porque o movimento está alto.',
+          opcoes: [
+            "Aceitar a proposta, pois quem decide quando e como as férias serão pagas ou trocadas é sempre a empresa.",
+            "Tirar os 30 dias por conta própria, sem avisar ninguém, já que as férias são um direito garantido por lei.",
+            "Lembrar que vender dias é opção do empregado, pedir as férias por escrito e procurar o RH ou o sindicato.",
+          ],
+          certa: 2,
+          direito:
+            "Férias: após 12 meses de trabalho, são 30 dias de descanso com pagamento acrescido de 1/3. Podem ser divididas em até 3 períodos (um deles com no mínimo 14 dias), com concordância do empregado. Vender até 10 dias (abono) é uma opção do empregado, não uma obrigação.",
+          importa:
+            "O descanso protege a saúde física e mental. A empresa não pode transformar o descanso em dinheiro por conta própria.",
+          erros:
+            "Aceitar tudo abre mão de um direito. Sair sem combinar também é erro: as datas das férias são marcadas conforme a organização do trabalho e as regras da lei.",
+          atitude:
+            "Pedir por escrito, conferir as regras e, se o problema continuar, procurar o sindicato ou o órgão competente.",
+        },
+
+        {
+          icone: "🦺",
+          titulo: "Segurança no trabalho",
+          nome: "Rafael, 19 anos",
+          historia:
+            'começou a trabalhar em uma obra e vai subir em um andaime. Ele recebeu só o capacete, não teve treinamento e não há cinto de segurança nem luvas. Quando perguntou, o supervisor respondeu: "se cair, a responsabilidade é sua".',
+          opcoes: [
+            "Subir com cuidado redobrado, aceitando que a responsabilidade por qualquer queda seja só dele mesmo.",
+            "Comprar o próprio cinto e as luvas com seu dinheiro e pedir reembolso à empresa só depois de começar.",
+            "Avisar a segurança do trabalho por escrito, pedir EPIs e treinamento antes de subir e procurar o sindicato.",
+          ],
+          certa: 2,
+          direito:
+            "Segurança e saúde no trabalho: a empresa deve fornecer EPIs adequados e gratuitos, treinar os trabalhadores e reduzir os riscos. Trabalho em altura exige cuidados específicos.",
+          importa:
+            "Quedas estão entre as causas graves de acidentes em obras. Prevenir é obrigação da empresa, não só do trabalhador.",
+          erros:
+            "Ter cuidado não substitui equipamento e treinamento. Pagar pelo EPI do próprio bolso também não resolve: a empresa é quem deve fornecê-lo, gratuitamente.",
+          atitude:
+            "Registrar o pedido por escrito, avisar a segurança do trabalho e, se nada mudar, procurar o sindicato ou a fiscalização do trabalho.",
+        },
+
+        {
+          icone: "📝",
+          titulo: "Trabalho informal",
+          nome: "Bianca, 18 anos",
+          historia:
+            'trabalha há 3 meses num mercadinho, seis dias por semana, em horário fixo e seguindo as ordens da dona. A dona disse que ela precisa abrir um MEI e emitir nota, "porque carteira assinada sai caro".',
+          opcoes: [
+            "Abrir o MEI e aceitar, pois assim paga menos impostos e não há mais nada a discutir com a dona.",
+            "Guardar provas de horários, ordens e pagamentos e buscar orientação sobre possível vínculo de emprego.",
+            "Abrir o MEI agora e depois ameaçar a dona com processo para tentar conseguir benefícios rapidamente.",
+          ],
+          certa: 1,
+          direito:
+            "Trabalho formal e vínculo de emprego: quando o trabalho é pessoal, habitual, pago e feito sob ordens de um chefe (subordinação), pode existir vínculo de emprego mesmo que peçam MEI ou recibo.",
+          importa:
+            "Sem carteira assinada, a pessoa pode perder FGTS, 13º, férias com 1/3 e proteção em caso de acidente. Cada situação precisa ser analisada com cuidado.",
+          erros:
+            "Aceitar sem entender pode custar direitos. Ameaçar não é caminho seguro: o certo é reunir informações e procurar orientação de quem pode analisar o caso.",
+          atitude:
+            "Guardar provas e buscar orientação no sindicato, no Ministério do Trabalho ou no MPT.",
+        },
+
+        {
+          icone: "🗣️",
+          titulo: "Respeito no ambiente de trabalho",
+          nome: "Diego, 22 anos",
+          historia:
+            'trabalha em vendas. A chefe expõe o ranking nas reuniões e o chama de "incompetente" na frente dos colegas. Ela também manda mensagens de madrugada com ameaças de demissão. Diego está com medo de falar.',
+          opcoes: [
+            "Registrar datas, falas e prints das mensagens e procurar apoio no RH, no sindicato ou no MPT.",
+            "Conversar só com a chefe, em particular, sem registrar nada, e esperar que ela pare sozinha logo.",
+            "Responder às mensagens de madrugada com ofensas, para a chefe entender como ele está se sentindo.",
+          ],
+          certa: 0,
+          direito:
+            "Assédio moral: humilhações e pressões repetidas que ferem a dignidade. Cobrar metas é normal, mas expor, ofender e ameaçar repetidamente não é.",
+          importa:
+            "O assédio adoece e afasta pessoas do trabalho. Todo ambiente de trabalho deve ser respeitoso.",
+          erros:
+            "Esperar sem registrar deixa o trabalhador sem provas. Responder com ofensas pode piorar a situação e colocar a vítima em risco.",
+          atitude:
+            "Registrar o que acontece, conversar com alguém de confiança e usar os canais de apoio e denúncia.",
+        },
+      ];
+
+      /* =====================================================
+   ✏️ EDITE AQUI: AS FICHAS DO MINIGAME
+   certa: 0 = Direito respeitado | 1 = Direito violado | 2 = Precisa analisar melhor
+   ===================================================== */
+      const NOMES_RESPOSTA = [
+        "Direito respeitado",
+        "Direito violado",
+        "Precisa analisar melhor",
+      ];
+      const CARTOES = [
+        {
+          texto:
+            "João recebeu equipamentos de proteção e treinamento antes de começar uma atividade com risco.",
+          certa: 0,
+          explica:
+            "A empresa deve fornecer EPIs gratuitos e treinar quem faz atividades de risco. Aqui isso foi cumprido.",
+          conceito: "Segurança e saúde no trabalho",
+        },
+        {
+          texto:
+            "Ana trabalha todos os dias da semana, sem nenhum dia de descanso, há dois meses.",
+          certa: 1,
+          explica:
+            "O descanso semanal remunerado é um direito, em regra aos domingos ou em folga compensatória. Trabalhar sempre sem descanso viola esse direito e prejudica a saúde.",
+          conceito: "Descanso semanal",
+        },
+        {
+          texto:
+            "Lucas, 16 anos e jovem aprendiz, foi mandado ficar 2 horas além do horário do contrato. A empresa vai pagar como horas extras.",
+          certa: 1,
+          explica:
+            "Para o aprendiz, a prorrogação da jornada não é permitida, mesmo que seja paga. O contrato precisa respeitar o limite de horas e a frequência escolar.",
+          conceito: "Jovem aprendiz",
+        },
+        {
+          texto:
+            "Carla vai tirar férias. Ela recebeu o pagamento com o adicional de 1/3 dois dias antes de começar o descanso.",
+          certa: 0,
+          explica:
+            "As férias devem ser pagas com antecedência (até 2 dias antes do início) e com o acréscimo de 1/3. Aqui o direito foi respeitado.",
+          conceito: "Férias remuneradas",
+        },
+        {
+          texto:
+            "Pedro fez horas extras que foram registradas e compensadas com folgas, conforme um banco de horas previsto em acordo válido.",
+          certa: 0,
+          explica:
+            "Quando há regra válida, registro e compensação dentro do prazo, o banco de horas está sendo cumprido. O problema seria não registrar nem compensar ou pagar.",
+          conceito: "Jornada e banco de horas",
+        },
+        {
+          texto:
+            "Uma funcionária recebe salário menor que o de um colega homem que faz exatamente o mesmo trabalho, só por ser mulher.",
+          certa: 1,
+          explica:
+            "Quando as funções são iguais, a diferença de salário por gênero é discriminação e viola o princípio da igualdade salarial.",
+          conceito: "Igualdade e discriminação",
+        },
+        {
+          texto:
+            "Um adolescente de 15 anos trabalha à noite em um bar, até meia-noite.",
+          certa: 1,
+          explica:
+            "Menores de 16 anos não podem trabalhar, exceto como aprendizes a partir dos 14. Além disso, menores de 18 anos não podem trabalhar à noite nem em ambientes inadequados.",
+          conceito: "Trabalho infantil e proteção do adolescente",
+        },
+        {
+          texto:
+            "Marina recebeu uma proposta de trabalho e precisa verificar as condições antes de aceitar.",
+          certa: 2,
+          explica:
+            "Antes de aceitar, convém conferir registro em carteira, salário, jornada e benefícios. Só com essas informações dá para saber se os direitos serão respeitados.",
+          conceito: "Informação antes de contratar",
+        },
+        {
+          texto:
+            'Davi está há 2 meses sem receber salário. A empresa diz que pagará "quando puder".',
+          certa: 1,
+          explica:
+            "O salário deve ser pago em dia, dentro do prazo legal (em regra, até o 5º dia útil do mês seguinte). Atraso de meses é uma violação.",
+          conceito: "Salário e pagamento",
+        },
+        {
+          texto:
+            "Sofia trabalhou num domingo. Não se sabe se ela terá folga em outro dia ou adicional.",
+          certa: 2,
+          explica:
+            "Depende da atividade, da escala e do contrato. Sem esses detalhes, não dá para concluir. É preciso analisar melhor.",
+          conceito: "Descanso semanal e escalas",
+        },
+        {
+          texto:
+            "Rui tem carteira assinada e recebeu a 1ª parcela do 13º até 30 de novembro e a 2ª parcela até 20 de dezembro.",
+          certa: 0,
+          explica:
+            "O 13º pode ser pago em duas parcelas: a primeira até 30 de novembro e a segunda até 20 de dezembro. Aqui os prazos foram respeitados.",
+          conceito: "13º salário",
+        },
+        {
+          texto:
+            "Léo desconfia que a empresa não deposita o FGTS dele, mas ainda não olhou o extrato do FGTS.",
+          certa: 2,
+          explica:
+            "Ainda não dá para concluir. O primeiro passo é consultar o extrato (pelo aplicativo do FGTS) e, se houver falta de depósitos, buscar o sindicato ou o órgão competente.",
+          conceito: "FGTS",
+        },
+      ];
+
+      /* Segundo minigame: relacionar problema e direito */
+      const RELACOES = [
+        {
+          problema:
+            "Júlia foi obrigada a trabalhar além da jornada prevista no contrato de aprendizagem.",
+          direito:
+            "Proteção do jovem aprendiz e jornada compatível com a escola",
+        },
+        {
+          problema:
+            "Ana trabalha todos os dias sem receber nenhum dia de descanso semanal.",
+          direito: "Descanso semanal remunerado",
+        },
+        {
+          problema:
+            "Rafael precisa subir em um andaime sem EPI adequado nem treinamento.",
+          direito: "Segurança e saúde no trabalho",
+        },
+        {
+          problema: "Davi está há dois meses sem receber seu salário.",
+          direito: "Pagamento do salário em dia",
+        },
+        {
+          problema:
+            "Uma funcionária recebe menos que um colega homem fazendo o mesmo trabalho, por ser mulher.",
+          direito: "Igualdade salarial e não discriminação",
+        },
+        {
+          problema:
+            "Diego é humilhado e ameaçado repetidamente pela chefe diante dos colegas.",
+          direito:
+            "Respeito no ambiente de trabalho e proteção contra assédio moral",
+        },
+      ];
+      const PONTOS_RELACAO = 5;
+
+      /* Resumo e mensagem da tela final (editáveis) */
+      const RESUMO = [
+        "Carteira assinada: FGTS, 13º, férias e INSS",
+        "Jornada e horas extras registradas e pagas",
+        "Descanso semanal e férias com 1/3",
+        "Salário em dia e com igualdade",
+        "EPIs e treinamento para atividades de risco",
+        "Trabalho infantil é proibido",
+        "Aprendiz: jornada compatível com a escola",
+        "Ambiente sem assédio e sem discriminação",
+        "Buscar apoio: responsáveis, escola, sindicato, MPT",
+      ];
+      const MENSAGEM_FINAL =
+        "Conhecer os direitos trabalhistas ajuda a reconhecer injustiças e a buscar orientação. Trabalho digno envolve respeito, segurança, remuneração e igualdade.";
+
+      /* =====================================================
+   LÓGICA DO JOGO (não precisa mexer)
+   ===================================================== */
+      const TOTAL = CASOS.length + CARTOES.length + RELACOES.length; // total de etapas (para a barra)
+      let estado = {}; // guarda pontos, acertos e posição
+
+      function $(id) {
+        return document.getElementById(id);
+      }
+
+      // Embaralha uma lista (usado para misturar a ordem das alternativas)
+      function embaralhar(lista) {
+        const a = lista.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const tmp = a[i];
+          a[i] = a[j];
+          a[j] = tmp;
+        }
+        return a;
+      }
+
+      // Mostra uma tela e esconde as outras
+      function tela(id) {
+        document
+          .querySelectorAll(".tela")
+          .forEach((t) => t.classList.remove("ativa"));
+        $(id).classList.add("ativa");
+        window.scrollTo(0, 0);
+      }
+
+      // Atualiza texto, barra de progresso e pontos no topo
+      function atualizarTopo(texto, feitos) {
+        $("rotulo").textContent = texto;
+        $("barra").style.width = (feitos / TOTAL) * 100 + "%";
+        $("pontos").textContent = "⭐ " + estado.pontos + " pontos";
+      }
+
+      function alternarComo() {
+        const d = $("como");
+        d.style.display = d.style.display === "none" ? "block" : "none";
+      }
+
+      // Começa (ou reinicia) o jogo
+      function comecar() {
+        estado = {
+          pontos: 0,
+          acertosCasos: 0,
+          acertosMini: 0,
+          acertosRelacao: 0,
+          i: 0,
+          seq: 0,
+          relacaoProblemas: [],
+          relacaoDireitos: [],
+          relacaoSelecionado: null,
+          relacaoResolvidos: 0,
+          ordemCasos: embaralhar([...Array(CASOS.length).keys()]),
+        };
+        $("topo").style.display = "block";
+        mostrarCaso();
+      }
+
+      /* ---------- PARTE 2: CASOS ---------- */
+      function mostrarCaso() {
+        const c = CASOS[estado.ordemCasos[estado.i]];
+        atualizarTopo(
+          "Caso " + (estado.i + 1) + " de " + CASOS.length,
+          estado.i,
+        );
+        let h =
+          "<h2>" +
+          c.icone +
+          " " +
+          c.titulo +
+          "</h2>" +
+          "<p><b>" +
+          c.nome +
+          "</b> " +
+          c.historia +
+          "</p><p>O que você faria?</p>";
+        // Mistura a ordem das alternativas; data-k guarda o número ORIGINAL de cada uma
+        embaralhar([0, 1, 2]).forEach((k) => {
+          h +=
+            '<button class="op" data-k="' +
+            k +
+            '" onclick="responderCaso(' +
+            k +
+            ')">' +
+            c.opcoes[k] +
+            "</button>";
+        });
+        $("caso").innerHTML = h;
+        tela("tCaso");
+      }
+
+      function responderCaso(k) {
+        const c = CASOS[estado.ordemCasos[estado.i]];
+        const ok = k === c.certa;
+        if (ok) {
+          estado.pontos += PONTOS_CASO;
+          estado.acertosCasos++;
+        }
+        // Bloqueia os botões e pinta certo/errado
+        document.querySelectorAll("#caso .op").forEach((b) => {
+          const j = Number(b.dataset.k);
+          b.disabled = true;
+          if (j === c.certa) b.classList.add("certo");
+          else if (j === k) b.classList.add("errado");
+        });
+        atualizarTopo(
+          "Caso " + (estado.i + 1) + " de " + CASOS.length,
+          estado.i + 1,
+        );
+        const fb =
+          '<div class="fb"><h3>' +
+          (ok ? "✅ Boa escolha!" : "⚠️ Essa não é a melhor escolha") +
+          "</h3>" +
+          (ok ? "" : "<p><b>Melhor opção:</b> " + c.opcoes[c.certa] + "</p>") +
+          "<p><b>Direito ou problema:</b> " +
+          c.direito +
+          "</p>" +
+          "<p><b>Por que importa:</b> " +
+          c.importa +
+          "</p>" +
+          "<p><b>Por que as outras opções falham:</b> " +
+          c.erros +
+          "</p>" +
+          "<p><b>Atitude segura:</b> " +
+          c.atitude +
+          "</p></div>" +
+          '<button class="grande" onclick="proximoCaso()">Continuar ➜</button>';
+        $("caso").insertAdjacentHTML("beforeend", fb);
+      }
+
+      function proximoCaso() {
+        estado.i++;
+        if (estado.i < CASOS.length) mostrarCaso();
+        else tela("tIntroMini"); // acabaram os casos: vai para o minigame
+      }
+
+      /* ---------- PARTE 3: MINIGAME (ficha + selos) ---------- */
+      function iniciarMini() {
+        estado.i = 0;
+        estado.seq = 0;
+        mostrarCartao();
+      }
+
+      function mostrarCartao() {
+        const c = CARTOES[estado.i];
+        const num = String(estado.i + 1).padStart(2, "0");
+        atualizarTopo(
+          "Fiscal do Trabalho: ficha " +
+            (estado.i + 1) +
+            " de " +
+            CARTOES.length,
+          CASOS.length + estado.i,
+        );
+        $("cartao").innerHTML =
+          '<div class="ficha">' +
+          '<div class="ficha-topo"><span>FICHA DE FISCALIZAÇÃO Nº ' +
+          num +
+          "</span><span>🔥 Sequência: " +
+          estado.seq +
+          "</span></div>" +
+          '<p class="ficha-texto">' +
+          c.texto +
+          "</p>" +
+          '<div class="carimbo" id="carimbo"></div>' +
+          "</div>" +
+          '<p style="margin:0 0 6px;font-size:14px">Escolha o selo:</p>' +
+          '<div class="selos">' +
+          '<button class="selo s0" onclick="responderCartao(0)"><span>✅</span>Direito respeitado</button>' +
+          '<button class="selo s1" onclick="responderCartao(1)"><span>❌</span>Direito violado</button>' +
+          '<button class="selo s2" onclick="responderCartao(2)"><span>🔍</span>Precisa analisar melhor</button>' +
+          "</div>";
+        tela("tCartao");
+      }
+
+      function responderCartao(k) {
+        const c = CARTOES[estado.i];
+        const ok = k === c.certa;
+        if (ok) {
+          estado.pontos += PONTOS_MINI;
+          estado.acertosMini++;
+          estado.seq++;
+        } else {
+          estado.seq = 0;
+        }
+        // Bloqueia os selos e destaca o correto
+        document.querySelectorAll("#cartao .selo").forEach((b, j) => {
+          b.disabled = true;
+          if (j === c.certa) b.classList.add("destaque");
+        });
+        // Carimbo na ficha
+        const car = $("carimbo");
+        car.textContent = ok ? "✔ CORRETO" : "✖ INCORRETO";
+        car.classList.add("mostra", ok ? "ok" : "no");
+        atualizarTopo(
+          "Fiscal do Trabalho: ficha " +
+            (estado.i + 1) +
+            " de " +
+            CARTOES.length,
+          CASOS.length + estado.i + 1,
+        );
+        const ultimo = estado.i === CARTOES.length - 1;
+        const fb =
+          '<div class="parecer"><h3>📋 Parecer do fiscal ' +
+          (ok ? "(+" + PONTOS_MINI + " pontos)" : "") +
+          "</h3>" +
+          (ok
+            ? ""
+            : "<p><b>Selo correto:</b> " + NOMES_RESPOSTA[c.certa] + "</p>") +
+          "<p>" +
+          c.explica +
+          "</p><p><b>Conceito:</b> " +
+          c.conceito +
+          "</p></div>" +
+          '<button class="grande" onclick="proximoCartao()">' +
+          (ultimo ? "Ver resultado 🏆" : "Próxima ficha ➜") +
+          "</button>";
+        $("cartao").insertAdjacentHTML("beforeend", fb);
+      }
+
+      function proximoCartao() {
+        estado.i++;
+        if (estado.i < CARTOES.length) mostrarCartao();
+        else tela("tIntroRelacao");
+      }
+
+      /* ---------- PARTE 4: MINIGAME DE RELACIONAR ---------- */
+      function iniciarRelacao() {
+        estado.relacaoProblemas = embaralhar([
+          ...Array(RELACOES.length).keys(),
+        ]);
+        estado.relacaoDireitos = embaralhar([...Array(RELACOES.length).keys()]);
+        estado.relacaoSelecionado = null;
+        estado.relacaoResolvidos = 0;
+        mostrarRelacao();
+      }
+      function mostrarRelacao() {
+        atualizarTopo(
+          "Relacionando direitos: " +
+            estado.relacaoResolvidos +
+            " de " +
+            RELACOES.length,
+          CASOS.length + CARTOES.length + estado.relacaoResolvidos,
+        );
+        let h =
+          "<h2>🔗 Relacione problema e direito</h2>" +
+          "<p>Clique em um <b>problema</b> e depois no <b>direito violado</b> correspondente.</p>" +
+          '<div class="relacao-painel"><div class="relacao-coluna"><h3>⚠️ Problemas</h3>';
+        estado.relacaoProblemas.forEach((k) => {
+          h +=
+            '<button class="item-relacao" data-problema="' +
+            k +
+            '" onclick="selecionarProblema(' +
+            k +
+            ')">' +
+            RELACOES[k].problema +
+            "</button>";
+        });
+        h +=
+          '</div><div class="relacao-conector">↔</div><div class="relacao-coluna"><h3>⚖️ Direitos violados</h3>';
+        estado.relacaoDireitos.forEach((k) => {
+          h +=
+            '<button class="item-relacao" data-direito="' +
+            k +
+            '" onclick="selecionarDireito(' +
+            k +
+            ')">' +
+            RELACOES[k].direito +
+            "</button>";
+        });
+        h +=
+          "</div></div>" +
+          '<div class="relacao-legenda">' +
+          "<span><i></i> Selecione para relacionar</span>" +
+          '<span><i class="verde"></i> Relação correta</span>' +
+          '<span><i class="vermelho"></i> Tente novamente</span>' +
+          "</div>" +
+          '<div id="relacaoStatus" class="relacao-status">Selecione um problema para começar.</div>';
+        $("relacao").innerHTML = h;
+        tela("tRelacao");
+      }
+      function selecionarProblema(k) {
+        const b = document.querySelector('[data-problema="' + k + '"]');
+        if (b.disabled) return;
+        estado.relacaoSelecionado = k;
+        document
+          .querySelectorAll("#relacao [data-problema]")
+          .forEach((x) => x.classList.remove("selecionado"));
+        b.classList.add("selecionado");
+        $("relacaoStatus").textContent =
+          "Agora escolha o direito correspondente.";
+      }
+      function selecionarDireito(k) {
+        if (estado.relacaoSelecionado === null) {
+          $("relacaoStatus").textContent = "Primeiro escolha um problema.";
+          return;
+        }
+        const p = estado.relacaoSelecionado;
+        const bp = document.querySelector('[data-problema="' + p + '"]');
+        const bd = document.querySelector('[data-direito="' + k + '"]');
+        if (p === k) {
+          estado.pontos += PONTOS_RELACAO;
+          estado.acertosRelacao++;
+          estado.relacaoResolvidos++;
+          bp.classList.remove("selecionado");
+          bp.classList.add("relacionado");
+          bp.disabled = true;
+          bd.classList.add("relacionado");
+          bd.disabled = true;
+          estado.relacaoSelecionado = null;
+          if (estado.relacaoResolvidos === RELACOES.length) {
+            atualizarTopo("Relacionamento concluído!", TOTAL);
+            $("relacao").insertAdjacentHTML(
+              "beforeend",
+              '<div class="parecer"><h3>🎉 Desafio concluído!</h3>' +
+                "<p>Você relacionou corretamente todos os problemas aos seus respectivos direitos.</p>" +
+                '<p style="font-size:20px"><b>+' +
+                RELACOES.length * PONTOS_RELACAO +
+                " pontos</b></p></div>" +
+                '<button class="grande" onclick="mostrarFinal()">Ver resultado 🏆</button>',
+            );
+          } else {
+            atualizarTopo(
+              "Relacionando direitos: " +
+                estado.relacaoResolvidos +
+                " de " +
+                RELACOES.length,
+              CASOS.length + CARTOES.length + estado.relacaoResolvidos,
+            );
+            $("relacaoStatus").textContent =
+              "✅ Correto! Escolha o próximo problema.";
+          }
+        } else {
+          bd.classList.add("erro");
+          $("relacaoStatus").textContent =
+            "❌ Não corresponde. Tente novamente.";
+          setTimeout(() => {
+            bd.classList.remove("erro");
+            if (estado.relacaoSelecionado !== null)
+              $("relacaoStatus").textContent =
+                "Escolha outro direito para este problema.";
+          }, 600);
+        }
+      }
+
+      /* ---------- TELA FINAL: RELATÓRIO DO FISCAL ---------- */
+      // Escolhe a "patente" do jogador de acordo com a porcentagem de pontos (edite os textos se quiser)
+      function escolherPatente(porcentagem) {
+        if (porcentagem >= 0.9)
+          return [
+            "🏅",
+            "Fiscal Chefe",
+            "Você domina os direitos trabalhistas!",
+          ];
+        if (porcentagem >= 0.7)
+          return [
+            "🥈",
+            "Fiscal Experiente",
+            "Ótimo trabalho! Você já reconhece a maioria dos casos.",
+          ];
+        if (porcentagem >= 0.5)
+          return [
+            "🥉",
+            "Fiscal em Treinamento",
+            "Bom começo! Jogue de novo para fixar os direitos.",
+          ];
+        return [
+          "📘",
+          "Fiscal Iniciante",
+          "Todo fiscal começa assim. Releia os pareceres e tente outra vez!",
+        ];
+      }
+
+      function mostrarFinal() {
+        atualizarTopo("Missão concluída!", TOTAL);
+        const max =
+          CASOS.length * PONTOS_CASO +
+          CARTOES.length * PONTOS_MINI +
+          RELACOES.length * PONTOS_RELACAO;
+        const pat = escolherPatente(estado.pontos / max);
+        const pctCasos = Math.round((estado.acertosCasos / CASOS.length) * 100);
+        const pctMini = Math.round((estado.acertosMini / CARTOES.length) * 100);
+        $("final").innerHTML =
+          "<h2>📁 Relatório do Fiscal</h2>" +
+          '<div class="ficha relatorio">' +
+          '<div class="ficha-topo"><span>RELATÓRIO FINAL DE FISCALIZAÇÃO</span><span>⭐ ' +
+          estado.pontos +
+          " pts</span></div>" +
+          '<p class="patente">' +
+          pat[0] +
+          "</p>" +
+          '<p class="titulo-patente">' +
+          pat[1] +
+          "</p>" +
+          '<p class="sub">' +
+          pat[2] +
+          "</p>" +
+          '<p class="nota">' +
+          estado.pontos +
+          " <small>/ " +
+          max +
+          " pontos</small></p>" +
+          '<div class="carimbo-final">MISSÃO CUMPRIDA</div>' +
+          "</div>" +
+          '<div class="placar">' +
+          '<div class="caixa"><span>📘 Casos</span><b>' +
+          estado.acertosCasos +
+          "/" +
+          CASOS.length +
+          "</b>" +
+          '<div class="mini-barra"><div style="width:' +
+          pctCasos +
+          '%"></div></div></div>' +
+          '<div class="caixa"><span>🔎 Minigame</span><b>' +
+          estado.acertosMini +
+          "/" +
+          CARTOES.length +
+          "</b>" +
+          '<div class="mini-barra"><div style="width:' +
+          pctMini +
+          '%"></div></div></div>' +
+          '<div class="caixa"><span>🔗 Relações</span><b>' +
+          estado.acertosRelacao +
+          "/" +
+          RELACOES.length +
+          "</b>" +
+          '<div class="mini-barra"><div style="width:' +
+          Math.round((estado.acertosRelacao / RELACOES.length) * 100) +
+          '%"></div></div></div>' +
+          "</div>" +
+          '<div class="msg-final">' +
+          MENSAGEM_FINAL +
+          "</div>" +
+          "<h3>📌 Direitos que vimos</h3>" +
+          '<div class="chips">' +
+          RESUMO.map((r) => '<span class="chip">✔ ' + r + "</span>").join("") +
+          "</div>" +
+          '<button class="grande" onclick="voltarInicio()">🔁 Jogar novamente</button>' +
+          '<div class="cracha"><b>Produzido por: ' +
+          NOME_ALUNO +
+          "</b><br>" +
+          ESCOLA +
+          "<br>Projeto escolar — Direitos Trabalhistas</div>";
+        tela("tFinal");
+      }
+
+      function voltarInicio() {
+        $("topo").style.display = "none";
+        tela("tInicio");
+      }
+    </script>
+  </body>
+</html>
