@@ -823,7 +823,7 @@ function responderCartao(k){
   const fb = '<div class="parecer"><h3>📋 Parecer do fiscal ' + (ok ? '(+' + PONTOS_MINI + ' pontos)' : '') + '</h3>' +
     (ok ? '' : '<p><b>Selo correto:</b> ' + NOMES_RESPOSTA[c.certa] + '</p>') +
     '<p>' + c.explica + '</p><p><b>Conceito:</b> ' + c.conceito + '</p></div>' +
-    '<button class="grande" onclick="proximoCartao()">' + (ultimo ? 'Ver resultado 🏆' : 'Próxima ficha ➜') + '</button>';
+    '<button class="grande" onclick="proximoCartao()">' + (ultimo ? 'Próximo desafio ➜' : 'Próxima ficha ➜') + '</button>';
   $('cartao').insertAdjacentHTML('beforeend', fb);
 }
 
